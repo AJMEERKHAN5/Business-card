@@ -1,0 +1,876 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Ajmer Premium Business Card Maker</title>
+
+<style>
+*{
+    box-sizing:border-box;
+    margin:0;
+    padding:0;
+}
+
+:root{
+    --bg:#070914;
+    --panel:#101426;
+    --panel2:#151b31;
+    --text:#fff;
+    --muted:#9ba6c1;
+    --border:rgba(255,255,255,.12);
+    --accent:#7c3aed;
+}
+
+body{
+    min-height:100vh;
+    background:
+        radial-gradient(circle at 20% 10%,rgba(124,58,237,.18),transparent 35%),
+        radial-gradient(circle at 90% 20%,rgba(6,182,212,.13),transparent 30%),
+        #070914;
+    color:var(--text);
+    font-family:Arial,"Segoe UI",sans-serif;
+}
+
+.app{
+    width:100%;
+    max-width:1400px;
+    margin:auto;
+    padding:18px;
+}
+
+.header{
+    padding:22px;
+    border:1px solid var(--border);
+    border-radius:26px;
+    background:rgba(16,20,38,.82);
+    backdrop-filter:blur(20px);
+    box-shadow:0 20px 60px rgba(0,0,0,.3);
+    margin-bottom:18px;
+}
+
+.brand{
+    display:flex;
+    align-items:center;
+    gap:14px;
+}
+
+.brand-logo{
+    width:58px;
+    height:58px;
+    border-radius:18px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-size:25px;
+    font-weight:900;
+    background:linear-gradient(135deg,#7c3aed,#06b6d4);
+}
+
+.brand h1{
+    font-size:24px;
+}
+
+.brand p{
+    color:var(--muted);
+    margin-top:4px;
+    font-size:13px;
+}
+
+.layout{
+    display:grid;
+    grid-template-columns:350px 1fr;
+    gap:18px;
+    align-items:start;
+}
+
+.panel{
+    position:sticky;
+    top:15px;
+    padding:20px;
+    border:1px solid var(--border);
+    border-radius:24px;
+    background:rgba(16,20,38,.85);
+    backdrop-filter:blur(20px);
+}
+
+.panel h2{
+    font-size:18px;
+    margin-bottom:16px;
+}
+
+.field{
+    margin-bottom:12px;
+}
+
+.field label{
+    display:block;
+    color:#b9c2d8;
+    font-size:12px;
+    margin-bottom:6px;
+}
+
+.field input,
+.field textarea,
+.field select{
+    width:100%;
+    border:1px solid var(--border);
+    outline:none;
+    border-radius:12px;
+    padding:12px;
+    color:white;
+    background:#0a0e1d;
+}
+
+.field textarea{
+    min-height:70px;
+    resize:vertical;
+}
+
+.field input:focus,
+.field textarea:focus,
+.field select:focus{
+    border-color:#8b5cf6;
+}
+
+.upload{
+    border:1px dashed rgba(255,255,255,.2);
+    border-radius:14px;
+    padding:14px;
+    text-align:center;
+    cursor:pointer;
+    margin-top:5px;
+    background:rgba(255,255,255,.035);
+}
+
+.upload input{
+    display:none;
+}
+
+.upload-preview{
+    width:60px;
+    height:60px;
+    border-radius:50%;
+    object-fit:cover;
+    display:none;
+    margin:10px auto 0;
+    border:2px solid rgba(255,255,255,.25);
+}
+
+.color-row{
+    display:grid;
+    grid-template-columns:repeat(6,1fr);
+    gap:7px;
+}
+
+.color{
+    height:30px;
+    border-radius:9px;
+    border:2px solid transparent;
+    cursor:pointer;
+}
+
+.color.active{
+    border-color:white;
+    transform:scale(1.08);
+}
+
+.generate{
+    width:100%;
+    padding:14px;
+    border:0;
+    border-radius:14px;
+    color:white;
+    font-weight:bold;
+    cursor:pointer;
+    background:linear-gradient(135deg,#7c3aed,#2563eb);
+    box-shadow:0 10px 30px rgba(79,70,229,.25);
+    margin-top:8px;
+}
+
+.results-head{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    margin-bottom:14px;
+}
+
+.results-head h2{
+    font-size:18px;
+}
+
+.count{
+    color:#c4b5fd;
+    font-size:12px;
+}
+
+.cards{
+    display:grid;
+    grid-template-columns:repeat(2,minmax(0,1fr));
+    gap:18px;
+}
+
+.card-wrap{
+    padding:14px;
+    border:1px solid var(--border);
+    border-radius:24px;
+    background:rgba(16,20,38,.72);
+}
+
+/* 💳 EXACT REAL BUSINESS CARD RATIO (3.5 x 2 Landscape) */
+.business-card{
+    position:relative;
+    width:100%;
+    aspect-ratio:3.5 / 2;
+    border-radius:12px;
+    padding:14px 16px;
+    color:white;
+    overflow:hidden;
+    isolation:isolate;
+    box-shadow:0 15px 35px rgba(0,0,0,.45);
+    display:flex;
+    flex-direction:column;
+    justify-content:space-between;
+}
+
+.business-card::after{
+    content:"";
+    position:absolute;
+    inset:0;
+    border-radius:12px;
+    pointer-events:none;
+    z-index:-1;
+}
+
+.card-num{
+    position:absolute;
+    top:10px;
+    right:14px;
+    font-size:10px;
+    opacity:.5;
+    font-weight:bold;
+}
+
+.card-header-flex{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    width:calc(100% - 25px);
+}
+
+.card-photo{
+    width:42px;
+    height:42px;
+    object-fit:cover;
+    border-radius:50%;
+    border:2px solid rgba(255,255,255,.6);
+    flex-shrink:0;
+    display:none;
+}
+
+.card-main-text{
+    flex:1;
+    min-width:0;
+}
+
+.card-name{
+    font-size:16px;
+    font-weight:900;
+    letter-spacing:.2px;
+    white-space:nowrap;
+    overflow:hidden;
+    text-overflow:ellipsis;
+    line-height:1.1;
+}
+
+.card-job{
+    margin-top:1px;
+    font-size:10px;
+    opacity:.85;
+    white-space:nowrap;
+    overflow:hidden;
+    text-overflow:ellipsis;
+}
+
+.card-company{
+    margin-top:1px;
+    font-size:9.5px;
+    font-weight:bold;
+    color:var(--accent);
+    white-space:nowrap;
+    overflow:hidden;
+    text-overflow:ellipsis;
+}
+
+.card-footer-flex{
+    display:flex;
+    justify-content:space-between;
+    align-items:flex-end;
+    width:100%;
+    margin-top:auto;
+}
+
+.card-info{
+    font-size:8.5px;
+    line-height:1.35;
+    opacity:.95;
+    max-width:65%;
+    word-break:break-word;
+}
+
+.card-social{
+    text-align:right;
+    font-size:8.5px;
+    line-height:1.3;
+    opacity:.9;
+}
+
+.card-actions{
+    display:grid;
+    grid-template-columns:repeat(3,1fr);
+    gap:7px;
+    margin-top:12px;
+}
+
+.card-actions button{
+    padding:8px 4px;
+    border:1px solid var(--border);
+    border-radius:10px;
+    color:white;
+    background:rgba(255,255,255,.07);
+    cursor:pointer;
+    font-size:11px;
+    font-weight:600;
+}
+
+.card-actions button:hover{
+    background:rgba(255,255,255,.14);
+}
+
+/* 🎨 50 DESIGNS FOR REAL BUSINESS CARD RATIO */
+.design-1{ background:linear-gradient(135deg,#111827,#312e81); }
+.design-2{ background:linear-gradient(135deg,#020617,#0f766e); }
+.design-3{ background:linear-gradient(135deg,#18181b,#7f1d1d); }
+.design-4{ background:linear-gradient(135deg,#172554,#1e3a8a); }
+.design-5{ background:linear-gradient(135deg,#3b0764,#701a75); }
+.design-6{ background:linear-gradient(135deg,#082f49,#164e63); }
+.design-7{ background:linear-gradient(135deg,#1c1917,#44403c); }
+.design-8{ background:linear-gradient(135deg,#172554,#4c1d95); }
+.design-9{ background:linear-gradient(135deg,#042f2e,#064e3b); }
+.design-10{ background:linear-gradient(135deg,#450a0a,#7f1d1d); }
+
+.design-11{ background:linear-gradient(120deg,#0f172a 60%,#7c3aed 60%); }
+.design-12{ background:linear-gradient(120deg,#111827 60%,#0891b2 60%); }
+.design-13{ background:linear-gradient(120deg,#18181b 60%,#db2777 60%); }
+.design-14{ background:linear-gradient(120deg,#172554 60%,#2563eb 60%); }
+.design-15{ background:linear-gradient(120deg,#1e1b4b 60%,#9333ea 60%); }
+.design-16{ background:linear-gradient(120deg,#052e16 60%,#16a34a 60%); }
+.design-17{ background:linear-gradient(120deg,#431407 60%,#ea580c 60%); }
+.design-18{ background:linear-gradient(120deg,#083344 60%,#06b6d4 60%); }
+.design-19{ background:linear-gradient(120deg,#3f3f46 60%,#a1a1aa 60%); }
+.design-20{ background:linear-gradient(120deg,#172554 60%,#7c3aed 60%); }
+
+.design-21{ background:#0b1020; }
+.design-21::after{ border:2px solid #8b5cf6; inset:6px; border-radius:8px; }
+
+.design-22{ background:#081c15; }
+.design-22::after{ border:2px solid #10b981; inset:6px; border-radius:8px; }
+
+.design-23{ background:#160b12; }
+.design-23::after{ border:2px solid #ec4899; inset:6px; border-radius:8px; }
+
+.design-24{ background:#071526; }
+.design-24::after{ border:2px solid #06b6d4; inset:6px; border-radius:8px; }
+
+.design-25{ background:#15100a; }
+.design-25::after{ border:2px solid #f59e0b; inset:6px; border-radius:8px; }
+
+.design-26{ background:linear-gradient(135deg,#020617,#1e293b); }
+.design-26::after{ background:radial-gradient(circle at 100% 0,rgba(124,58,237,.45),transparent 45%); }
+
+.design-27{ background:linear-gradient(135deg,#020617,#172554); }
+.design-27::after{ background:radial-gradient(circle at 100% 100%,rgba(6,182,212,.4),transparent 45%); }
+
+.design-28{ background:linear-gradient(135deg,#18181b,#3f3f46); }
+.design-28::after{ background:radial-gradient(circle at 0 0,rgba(255,255,255,.16),transparent 40%); }
+
+.design-29{ background:linear-gradient(135deg,#1e1b4b,#4c1d95); }
+.design-29::after{ background:radial-gradient(circle at 100% 0,rgba(236,72,153,.3),transparent 45%); }
+
+.design-30{ background:linear-gradient(135deg,#042f2e,#115e59); }
+.design-30::after{ background:radial-gradient(circle at 0 100%,rgba(45,212,191,.35),transparent 45%); }
+
+.design-31{ background:linear-gradient(135deg,#0f172a,#111827); }
+.design-31 .card-name{ text-transform:uppercase; letter-spacing:1px; }
+
+.design-32{ background:linear-gradient(135deg,#1c1917,#292524); }
+.design-32 .card-name{ font-family:Georgia,serif; }
+
+.design-33{ background:linear-gradient(135deg,#172554,#0f172a); }
+.design-33 .card-name{ font-style:italic; }
+
+.design-34{ background:linear-gradient(135deg,#3f0a0a,#1c1917); }
+.design-34 .card-name{ letter-spacing:1px; }
+
+.design-35{ background:linear-gradient(135deg,#082f49,#0f172a); }
+.design-35 .card-name{ font-size:17px; }
+
+.design-36{ background:linear-gradient(135deg,#064e3b,#022c22); }
+.design-36 .card-name{ font-weight:800; }
+
+.design-37{ background:linear-gradient(135deg,#4a044e,#1e1b4b); }
+.design-37 .card-name{ text-shadow:0 3px 12px rgba(255,255,255,.2); }
+
+.design-38{ background:linear-gradient(135deg,#171717,#262626); }
+.design-38 .card-name{ font-family:Georgia,serif; }
+
+.design-39{ background:linear-gradient(135deg,#111827,#374151); }
+.design-39 .card-name{ letter-spacing:1px; }
+
+.design-40{ background:linear-gradient(135deg,#020617,#312e81,#0f766e); }
+.design-40 .card-name{ font-size:17px; text-shadow:0 3px 15px rgba(0,0,0,.5); }
+
+.design-41{ background:linear-gradient(135deg,#09090b,#27272a); border-left:4px solid #8b5cf6; }
+.design-42{ background:linear-gradient(135deg,#0284c7,#0369a1); }
+.design-43{ background:linear-gradient(135deg,#d97706,#b45309); }
+.design-44{ background:linear-gradient(135deg,#059669,#047857); }
+.design-45{ background:linear-gradient(135deg,#e11d48,#be123c); }
+.design-46{ background:linear-gradient(135deg,#4f46e5,#3730a3); }
+.design-47{ background:linear-gradient(135deg,#000000,#18181b); border:1px solid rgba(255,255,255,0.2); }
+.design-48{ background:linear-gradient(135deg,#0f172a,#0284c7); }
+.design-48 .card-name{ font-family:Georgia,serif; text-transform:uppercase; }
+.design-49{ background:linear-gradient(135deg,#31103f,#14051e); }
+.design-49::after{ border:2px dashed #ec4899; inset:6px; border-radius:8px; }
+.design-50{ background:radial-gradient(circle at center, #1e1b4b 0%, #09090b 100%); }
+
+.toast{
+    position:fixed;
+    left:50%;
+    bottom:20px;
+    transform:translateX(-50%) translateY(80px);
+    padding:12px 18px;
+    border-radius:14px;
+    background:#171d32;
+    border:1px solid rgba(255,255,255,.15);
+    color:white;
+    font-size:12px;
+    opacity:0;
+    transition:.3s;
+    z-index:1000;
+}
+
+.toast.show{
+    opacity:1;
+    transform:translateX(-50%) translateY(0);
+}
+
+@media(max-width:900px){
+    .layout{ grid-template-columns:1fr; }
+    .panel{ position:relative; top:0; }
+    .cards{ grid-template-columns:1fr; }
+}
+
+@media(max-width:520px){
+    .app{ padding:10px; }
+    .cards{ gap:12px; }
+    .card-name{ font-size:15px; }
+    .card-photo{ width:36px; height:36px; }
+    .card-info{ font-size:8px; }
+}
+/* WebView / touch tweaks */
+.app{padding-top:max(18px,env(safe-area-inset-top));padding-bottom:max(18px,env(safe-area-inset-bottom));padding-left:max(18px,env(safe-area-inset-left));padding-right:max(18px,env(safe-area-inset-right));}
+.card-actions button{min-height:44px;font-size:12px;-webkit-tap-highlight-color:transparent;}
+.color{height:38px;}
+.generate{min-height:50px;font-size:15px;}
+.card-actions button:disabled{opacity:.5;}
+.toast{max-width:90vw;text-align:center;bottom:max(20px,env(safe-area-inset-bottom));}
+</style>
+
+</head>
+
+<body>
+
+<div class="app">
+
+<header class="header">
+    <div class="brand">
+        <div class="brand-logo">A</div>
+        <div>
+            <h1>Ajmer Business Card Studio</h1>
+            <p>Create premium business cards directly in your browser</p>
+        </div>
+    </div>
+</header>
+
+<div class="layout">
+
+<!-- EDITOR -->
+<aside class="panel">
+
+    <h2>✏️ Card Details</h2>
+
+    <div class="field">
+        <label>Full Name</label>
+        <input id="name" value="Ajmer" placeholder="Your name">
+    </div>
+
+    <div class="field">
+        <label>Job Title</label>
+        <input id="job" value="Digital Creator" placeholder="Your profession">
+    </div>
+
+    <div class="field">
+        <label>Company / Business</label>
+        <input id="company" value="Ajmer Studio" placeholder="Company name">
+    </div>
+
+    <div class="field">
+        <label>Phone</label>
+        <input id="phone" value="+92 300 0000000" placeholder="Phone number">
+    </div>
+
+    <div class="field">
+        <label>Email</label>
+        <input id="email" value="hello@example.com" placeholder="Email">
+    </div>
+
+    <div class="field">
+        <label>Website</label>
+        <input id="website" value="www.example.com" placeholder="Website">
+    </div>
+
+    <div class="field">
+        <label>WhatsApp</label>
+        <input id="whatsapp" value="+92 300 0000000" placeholder="WhatsApp">
+    </div>
+
+    <div class="field">
+        <label>Address</label>
+        <textarea id="address" placeholder="Business address">Pakistan</textarea>
+    </div>
+
+    <div class="field">
+        <label>Profile Photo / Logo</label>
+
+        <label class="upload">
+            🖼️ Choose Photo / Logo
+            <input type="file" id="photo" accept="image/*">
+            <img id="photoPreview" class="upload-preview" alt="Preview">
+        </label>
+    </div>
+
+    <div class="field">
+        <label>Accent Color</label>
+
+        <div class="color-row">
+            <div class="color active" style="background:#8b5cf6" data-color="#8b5cf6"></div>
+            <div class="color" style="background:#06b6d4" data-color="#06b6d4"></div>
+            <div class="color" style="background:#10b981" data-color="#10b981"></div>
+            <div class="color" style="background:#f59e0b" data-color="#f59e0b"></div>
+            <div class="color" style="background:#ec4899" data-color="#ec4899"></div>
+            <div class="color" style="background:#ef4444" data-color="#ef4444"></div>
+        </div>
+    </div>
+
+    <button class="generate" onclick="generateCards()">
+        ✨ Generate 50 Premium Cards
+    </button>
+
+</aside>
+
+<!-- RESULTS -->
+<main>
+
+    <div class="results-head">
+        <h2>💎 Premium Designs</h2>
+        <span class="count">50 Designs</span>
+    </div>
+
+    <div id="cards" class="cards"></div>
+
+</main>
+
+</div>
+
+<footer style="text-align:center; padding:25px 10px; color:#68748f; font-size:11px;">
+    AJMER BUSINESS CARD STUDIO • HTML • CSS • JAVASCRIPT
+</footer>
+
+</div>
+
+<div id="toast" class="toast"></div>
+
+<script>
+let photoData = "";
+const $ = id => document.getElementById(id);
+
+function getData(){
+    return {
+        name: $("name").value.trim() || "Your Name",
+        job: $("job").value.trim() || "Professional",
+        company: $("company").value.trim() || "Your Company",
+        phone: $("phone").value.trim() || "+00 000 000000",
+        email: $("email").value.trim() || "email@example.com",
+        website: $("website").value.trim() || "www.example.com",
+        whatsapp: $("whatsapp").value.trim() || "+00 000 000000",
+        address: $("address").value.trim() || "Your Address"
+    };
+}
+
+$("photo").addEventListener("change", function(event){
+    const file = event.target.files[0];
+    if(!file) return;
+
+    if(!file.type.startsWith("image/")){
+        showToast("Please select an image.");
+        return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = function(e){
+        photoData = e.target.result;
+        $("photoPreview").src = photoData;
+        $("photoPreview").style.display = "block";
+        generateCards();
+    };
+    reader.readAsDataURL(file);
+});
+
+document.querySelectorAll(".color").forEach(function(item){
+    item.addEventListener("click", function(){
+        document.querySelectorAll(".color").forEach(x => x.classList.remove("active"));
+        item.classList.add("active");
+        document.documentElement.style.setProperty("--accent", item.dataset.color);
+        generateCards();
+    });
+});
+
+["name", "job", "company", "phone", "email", "website", "whatsapp", "address"].forEach(function(id){
+    $(id).addEventListener("input", generateCards);
+});
+
+function createCard(data, number){
+    const card = document.createElement("div");
+    card.className = "card-wrap";
+
+    const photo = photoData
+        ? `<img class="card-photo" src="${photoData}" style="display:block" alt="Photo">`
+        : "";
+
+    card.innerHTML = `
+        <div class="business-card design-${number}" id="card-${number}">
+            <div class="card-num">${String(number).padStart(2,"0")}</div>
+            <div class="card-header-flex">
+                ${photo}
+                <div class="card-main-text">
+                    <div class="card-name">${escapeHTML(data.name)}</div>
+                    <div class="card-job">${escapeHTML(data.job)}</div>
+                    <div class="card-company">${escapeHTML(data.company)}</div>
+                </div>
+            </div>
+
+            <div class="card-footer-flex">
+                <div class="card-info">
+                    📞 ${escapeHTML(data.phone)}<br>
+                    ✉️ ${escapeHTML(data.email)}<br>
+                    🌐 ${escapeHTML(data.website)}<br>
+                    📍 ${escapeHTML(data.address)}
+                </div>
+
+                <div class="card-social">
+                    WhatsApp<br>
+                    ${escapeHTML(data.whatsapp)}
+                </div>
+            </div>
+        </div>
+
+        <div class="card-actions">
+            <button onclick="copyCard(${number})">📋 Copy</button>
+            <button onclick="downloadCard(${number})">💾 PNG</button>
+            <button onclick="shareCard(${number})">📤 Share</button>
+        </div>
+    `;
+
+    return card;
+}
+
+function generateCards(){
+    const data = getData();
+    const container = $("cards");
+    container.innerHTML = "";
+
+    for(let i = 1; i <= 50; i++){
+        container.appendChild(createCard(data, i));
+    }
+}
+
+function escapeHTML(value){
+    return String(value)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+}
+
+async function copyCard(number){
+    const data = getData();
+    const text =
+`Name: ${data.name}
+Job: ${data.job}
+Company: ${data.company}
+Phone: ${data.phone}
+Email: ${data.email}
+Website: ${data.website}
+WhatsApp: ${data.whatsapp}
+Address: ${data.address}`;
+
+    try{
+        await navigator.clipboard.writeText(text);
+        showToast("Business card details copied!");
+    }catch(error){
+        const textarea = document.createElement("textarea");
+        textarea.value = text;
+        document.body.appendChild(textarea);
+        textarea.select();
+        document.execCommand("copy");
+        textarea.remove();
+        showToast("Details copied!");
+    }
+}
+
+/* ================= SAVE FILE (Android bridge -> Downloads folder) ================= */
+function saveFile(bytes, fileName, mimeType){
+  // bytes = Uint8Array
+  let s=""; for(let i=0;i<bytes.length;i+=0x8000)
+    s+=String.fromCharCode.apply(null,bytes.subarray(i,i+0x8000));
+  const b64=btoa(s);
+  if(window.Android && typeof window.Android.saveFile==="function"){
+    const r=window.Android.saveFile(b64,fileName,mimeType);
+    if(!r) throw new Error("SAVE_FAILED");
+    return r;
+  }
+  // normal browser fallback
+  const blob=new Blob([bytes],{type:mimeType}),a=document.createElement("a");
+  a.href=URL.createObjectURL(blob);a.download=fileName;
+  document.body.appendChild(a);a.click();
+  setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove()},4000);
+  return fileName;
+}
+
+/* ================= OFFLINE CARD -> PNG (no library, no internet) ================= */
+function collectCss(){
+  let out="";
+  const walk=rules=>{
+    for(const r of Array.from(rules)){
+      if(r.type===4){
+        let ok=true;
+        try{ok=window.matchMedia(r.conditionText||r.media.mediaText).matches}catch(e){}
+        if(ok)walk(r.cssRules);
+      }else if(r.type===1||r.type===5||r.type===7){out+=r.cssText+"\n"}
+    }
+  };
+  for(const sheet of Array.from(document.styleSheets)){try{walk(sheet.cssRules)}catch(e){}}
+  return out.replace(/\]\]>/g,"]]]]><![CDATA[>");
+}
+
+async function renderCardPNG(number){
+  const card=$("card-"+number);
+  if(!card) throw new Error("NO_CARD");
+  const w=Math.round(card.offsetWidth),h=Math.round(card.offsetHeight);
+  if(!w||!h) throw new Error("NO_SIZE");
+  const clone=card.cloneNode(true);
+  clone.removeAttribute("id");
+  clone.style.width=w+"px";clone.style.height=h+"px";clone.style.boxShadow="none";
+  const accent=(getComputedStyle(document.documentElement).getPropertyValue("--accent")||"#8b5cf6").trim();
+  const xml=new XMLSerializer().serializeToString(clone);
+  const svg='<svg xmlns="http://www.w3.org/2000/svg" width="'+w+'" height="'+h+'">'
+    +'<foreignObject x="0" y="0" width="'+w+'" height="'+h+'">'
+    +'<div xmlns="http://www.w3.org/1999/xhtml" style="width:'+w+'px;height:'+h+'px;--accent:'+accent+';color:#fff;font-family:Arial,\'Segoe UI\',sans-serif">'
+    +'<style><![CDATA['+collectCss()+']]></style>'+xml+'</div></foreignObject></svg>';
+  const img=new Image();
+  await new Promise((res,rej)=>{
+    img.onload=res;
+    img.onerror=()=>rej(new Error("RENDER_FAILED"));
+    img.src="data:image/svg+xml;charset=utf-8,"+encodeURIComponent(svg);
+  });
+  await new Promise(r=>setTimeout(r,40));
+  const scale=Math.min(4,4096/Math.max(w,h));
+  const canvas=document.createElement("canvas");
+  canvas.width=Math.round(w*scale);canvas.height=Math.round(h*scale);
+  const ctx=canvas.getContext("2d");
+  ctx.scale(scale,scale);
+  ctx.drawImage(img,0,0,w,h);
+  const bin=atob(canvas.toDataURL("image/png").split(",")[1]);
+  const bytes=new Uint8Array(bin.length);
+  for(let i=0;i<bin.length;i++)bytes[i]=bin.charCodeAt(i);
+  return bytes;
+}
+
+let busy=false;
+function errText(err){
+  const m=err&&err.message;
+  if(m==="SAVE_FAILED")return "Could not save the file. Allow storage permission for the app and try again.";
+  return "Could not create the image. Please try again.";
+}
+
+async function downloadCard(number){
+  if(busy)return;
+  busy=true;
+  showToast("Creating HD PNG...");
+  try{
+    const bytes=await renderCardPNG(number);
+    const name=await saveFile(bytes,"Ajmer-Card-"+number+"-"+Date.now()+".png","image/png");
+    showToast("Saved: "+name);
+  }catch(err){
+    console.error(err);
+    showToast(errText(err));
+  }
+  busy=false;
+}
+
+async function shareCard(number){
+  if(busy)return;
+  busy=true;
+  showToast("Preparing image...");
+  try{
+    const bytes=await renderCardPNG(number);
+    const fileName="Ajmer-Card-"+number+".png";
+    let shared=false;
+    try{
+      if(!(window.Android&&typeof window.Android.saveFile==="function")&&window.File&&navigator.canShare){
+        const file=new File([bytes],fileName,{type:"image/png"});
+        if(navigator.canShare({files:[file]})){
+          await navigator.share({files:[file],title:"Ajmer Business Card",text:"Check out my business card!"});
+          shared=true;
+          showToast("Card image shared!");
+        }
+      }
+    }catch(shareErr){
+      if(shareErr&&shareErr.name==="AbortError"){shared=true}
+    }
+    if(!shared){
+      const name=await saveFile(bytes,"Ajmer-Card-"+number+"-"+Date.now()+".png","image/png");
+      showToast("Saved in Downloads: "+name+" - share it from your file manager.");
+    }
+  }catch(err){
+    console.error(err);
+    showToast(errText(err));
+  }
+  busy=false;
+}
+
+function showToast(message){
+    const toast = $("toast");
+    toast.textContent = message;
+    toast.classList.add("show");
+    setTimeout(function(){
+        toast.classList.remove("show");
+    }, 3200);
+}
+
+generateCards();
+</script>
+
+</body>
+</html>
